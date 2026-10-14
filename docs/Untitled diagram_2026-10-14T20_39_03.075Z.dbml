@@ -1,0 +1,98 @@
+Table desperdicios [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	fecha date [ not null ]
+	producto_id integer [ not null ]
+	motivo_id integer [ not null ]
+	cantidad numeric(10,3) [ not null ]
+	coste_total numeric(12,2) [ not null ]
+	notas text
+}
+
+Table compras [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	fecha date [ not null ]
+	producto_id integer [ not null ]
+	proveedor_id integer
+	cantidad numeric(10,3) [ not null ]
+	coste_unitario numeric(10,2) [ not null ]
+	total numeric(12,2) [ not null ]
+	importacion_id integer
+}
+
+Table ventas [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	fecha date [ not null ]
+	producto_id integer [ not null ]
+	cantidad numeric(10,3) [ not null ]
+	precio_unitario numeric(10,2) [ not null ]
+	total numeric(12,2) [ not null ]
+	importacion_id integer
+}
+
+Table importaciones [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	tipo varchar(10) [ not null ]
+	archivo varchar(255) [ not null ]
+	fecha timestamp [ not null, default: `now()` ]
+	filas_ok integer [ not null, default: 0 ]
+	filas_error integer [ not null, default: 0 ]
+	estado varchar(20) [ not null ]
+}
+
+Table motivos_desperdicio [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	nombre varchar(100) [ not null, unique ]
+}
+
+Table productos [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	nombre varchar(150) [ not null ]
+	categoria_id integer [ not null ]
+	unidad varchar(10) [ not null ]
+	coste_unitario numeric(10,2) [ not null ]
+	precio_venta numeric(10,2) [ not null ]
+	activo boolean [ not null, default: true ]
+}
+
+Table proveedores [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	nombre varchar(150) [ not null ]
+	contacto varchar(150)
+}
+
+Table categorias [headercolor: #175e7a] {
+	id integer [ pk, increment ]
+	nombre varchar(100) [ not null, unique ]
+}
+
+Ref fk_productos_categoria_id_categorias {
+	productos.categoria_id > categorias.id [ delete: no action, update: no action ]
+}
+
+Ref fk_ventas_producto_id_productos {
+	ventas.producto_id > productos.id [ delete: no action, update: no action ]
+}
+
+Ref fk_ventas_importacion_id_importaciones {
+	ventas.importacion_id > importaciones.id [ delete: no action, update: no action ]
+}
+
+Ref fk_compras_producto_id_productos {
+	compras.producto_id > productos.id [ delete: no action, update: no action ]
+}
+
+Ref fk_compras_proveedor_id_proveedores {
+	compras.proveedor_id > proveedores.id [ delete: no action, update: no action ]
+}
+
+Ref fk_compras_importacion_id_importaciones {
+	compras.importacion_id > importaciones.id [ delete: no action, update: no action ]
+}
+
+Ref fk_desperdicios_producto_id_productos {
+	desperdicios.producto_id > productos.id [ delete: no action, update: no action ]
+}
+
+Ref fk_desperdicios_motivo_id_motivos_desperdicio {
+	desperdicios.motivo_id > motivos_desperdicio.id [ delete: no action, update: no action ]
+}
