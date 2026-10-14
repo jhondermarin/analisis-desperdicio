@@ -1,15 +1,118 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique @db.VarChar(100)
+  productos Producto[]
+
+  @@map("categorias")
+}
+
+model Proveedor {
+  id       Int      @id @default(autoincrement())
+  nombre   String   @db.VarChar(150)
+  contacto String?  @db.VarChar(150)
+  compras  Compra[]
+
+  @@map("proveedores")
+}
+
+model Producto {
+  id            Int     @id @default(autoincrement())
+  nombre        String  @db.VarChar(150)
+  categoriaId   Int     @map("categoria_id")
+  unidad        String  @db.VarChar(10)
+  costeUnitario Decimal @map("coste_unitario") @db.Decimal(10, 2)
+  precioVenta   Decimal @map("precio_venta") @db.Decimal(10, 2)
+  activo        Boolean @default(true)
+
+  categoria    Categoria     @relation(fields: [categoriaId], references: [id])
+  ventas       Venta[]
+  compras      Compra[]
+  desperdicios Desperdicio[]
+
+  @@map("productos")
+}
+
+model MotivoDesperdicio {
+  id           Int           @id @default(autoincrement())
+  nombre       String        @unique @db.VarChar(100)
+  desperdicios Desperdicio[]
+
+  @@map("motivos_desperdicio")
+}
+
+model Importacion {
+  id         Int      @id @default(autoincrement())
+  tipo       String   @db.VarChar(10)
+  archivo    String   @db.VarChar(255)
+  fecha      DateTime @default(now())
+  filasOk    Int      @default(0) @map("filas_ok")
+  filasError Int      @default(0) @map("filas_error")
+  estado     String   @db.VarChar(20)
+
+  ventas  Venta[]
+  compras Compra[]
+
+  @@map("importaciones")
+}
+
+model Venta {
+  id             Int      @id @default(autoincrement())
+  fecha          DateTime @db.Date
+  productoId     Int      @map("producto_id")
+  cantidad       Decimal  @db.Decimal(10, 3)
+  precioUnitario Decimal  @map("precio_unitario") @db.Decimal(10, 2)
+  total          Decimal  @db.Decimal(12, 2)
+  importacionId  Int?     @map("importacion_id")
+
+  producto    Producto     @relation(fields: [productoId], references: [id])
+  importacion Importacion? @relation(fields: [importacionId], references: [id])
+
+  @@index([fecha])
+  @@index([productoId])
+  @@map("ventas")
+}
+
+model Compra {
+  id            Int      @id @default(autoincrement())
+  fecha         DateTime @db.Date
+  productoId    Int      @map("producto_id")
+  proveedorId   Int?     @map("proveedor_id")
+  cantidad      Decimal  @db.Decimal(10, 3)
+  costeUnitario Decimal  @map("coste_unitario") @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(12, 2)
+  importacionId Int?     @map("importacion_id")
+
+  producto    Producto     @relation(fields: [productoId], references: [id])
+  proveedor   Proveedor?   @relation(fields: [proveedorId], references: [id])
+  importacion Importacion? @relation(fields: [importacionId], references: [id])
+
+  @@index([fecha])
+  @@index([productoId])
+  @@map("compras")
+}
+
+model Desperdicio {
+  id         Int      @id @default(autoincrement())
+  fecha      DateTime @db.Date
+  productoId Int      @map("producto_id")
+  motivoId   Int      @map("motivo_id")
+  cantidad   Decimal  @db.Decimal(10, 3)
+  costeTotal Decimal  @map("coste_total") @db.Decimal(12, 2)
+  notas      String?  @db.Text
+
+  producto Producto          @relation(fields: [productoId], references: [id])
+  motivo   MotivoDesperdicio @relation(fields: [motivoId], references: [id])
+
+  @@index([fecha])
+  @@index([productoId])
+  @@map("desperdicios")
 }
