@@ -76,3 +76,108 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(venta, { status: 201 });
 }
+
+
+
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+
+  const productoIdTexto = searchParams.get("productoId");
+  const fechaDesdeTexto = searchParams.get("fechaDesde");
+  const fechaHastaTexto = searchParams.get("fechaHasta");
+
+  // Validar el filtro de producto
+  let productoId: number | undefined;
+
+  if (productoIdTexto !== null) {
+    productoId = Number(productoIdTexto);
+
+    if (
+      productoIdTexto.trim() === "" ||
+      !Number.isSafeInteger(productoId) ||
+      productoId <= 0
+    ) {
+      return errorJson(
+        400,
+        "Filtro inválido",
+        "productoId debe ser un número entero positivo",
+      );
+    }
+  }
+
+  // Validar fechas reales en formato YYYY-MM-DD
+  function fechaValida(valor: string): boolean {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+      return false;
+    }
+
+    const fecha = new Date(`${valor}T00:00:00.000Z`);
+
+    return (
+      !Number.isNaN(fecha.getTime()) &&
+      fecha.toISOString().slice(0, 10) === valor
+    );
+  }
+
+  if (
+    (fechaDesdeTexto !== null && !fechaValida(fechaDesdeTexto)) ||
+    (fechaHastaTexto !== null && !fechaValida(fechaHastaTexto))
+  ) {
+    return errorJson(
+      400,
+      "Filtro inválido",
+      "Las fechas deben ser válidas y tener formato YYYY-MM-DD",
+    );
+  }
+
+  // Comprobar el orden del período
+  if (
+    fechaDesdeTexto !== null &&
+    fechaHastaTexto !== null &&
+    fechaDesdeTexto > fechaHastaTexto
+  ) {
+    return errorJson(
+      400,
+      "Filtro inválido",
+      "fechaDesde no puede ser posterior a fechaHasta",
+    );
+  }
+
+  // Construir los filtros de Prisma
+  const where: Prisma.VentaWhereInput = {};
+
+  if (productoId !== undefined) {
+    where.productoId = productoId;
+  }
+
+  if (fechaDesdeTexto !== null || fechaHastaTexto !== null) {
+    where.fecha = {
+      ...(fechaDesdeTexto !== null
+        ? { gte: new Date(`${fechaDesdeTexto}T00:00:00.000Z`) }
+        : {}),
+      ...(fechaHastaTexto !== null
+        ? { lte: new Date(`${fechaHastaTexto}T00:00:00.000Z`) }
+        : {}),
+    };
+  }
+
+  const ventas = await prisma.venta.findMany({
+    where,
+    orderBy: [
+      { fecha: "desc" },
+      { id: "desc" },
+    ],
+    include: {
+      producto: {
+        select: {
+          id: true,
+          nombre: true,
+          unidad: true,
+        },
+      },
+    },
+  });
+
+  return NextResponse.json(ventas);
+}
