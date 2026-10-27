@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  esFechaValida,
+  esRangoFechaValido,
+} from "@/lib/validaciones/fechas";
+
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
