@@ -13,20 +13,6 @@ export async function GET(request: NextRequest) {
     const fechaHasta = searchParams.get("fechaHasta");
 
 
-    const esFechaValida = (valor: string | null): boolean => {
-    if (valor === null) return true;
-
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
-        return false;
-    }
-
-    const fecha = new Date(`${valor}T00:00:00.000Z`);
-
-    return (
-        !Number.isNaN(fecha.getTime()) &&
-        fecha.toISOString().slice(0, 10) === valor
-    );
-    };
 
     if (!esFechaValida(fechaDesde) || !esFechaValida(fechaHasta)) {
     return NextResponse.json(
@@ -36,11 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
 
-    if (
-    fechaDesde !== null &&
-    fechaHasta !== null &&
-    fechaDesde > fechaHasta
-    ) {
+    if (!esRangoFechaValido(fechaDesde, fechaHasta)) {
     return NextResponse.json(
         {
         error: "La fecha inicial no puede ser posterior a la fecha final.",
@@ -55,7 +37,7 @@ export async function GET(request: NextRequest) {
         ? { gte: new Date(`${fechaDesde}T00:00:00.000Z`) }
         : {}),
     ...(fechaHasta !== null
-        ? { lte: new Date(`${fechaHasta}T00:00:00.000Z`) }
+        ? { lte: new Date(`${fechaHasta}T23:59:59.999Z`) }
         : {}),
     };
 
