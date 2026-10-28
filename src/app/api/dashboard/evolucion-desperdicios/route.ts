@@ -1,7 +1,8 @@
 
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { agruparDesperdiciosPorDia } from "@/lib/dashboard/agrupar-desperdicios";
+
 
 import {
   esFechaValida,
@@ -55,29 +56,7 @@ export async function GET(request: Request) {
     },
   });
 
-  // 6. Agrupar los costes por día
-  const totalesPorDia = new Map<string, Prisma.Decimal>();
-
-  for (const desperdicio of desperdicios) {
-    const fecha = desperdicio.fecha.toISOString().slice(0, 10);
-
-    const totalAnterior =
-      totalesPorDia.get(fecha) ?? new Prisma.Decimal(0);
-
-    totalesPorDia.set(
-      fecha,
-      totalAnterior.plus(desperdicio.costeTotal),
-    );
-  }
-
-  // 7. Convertir los resultados a JSON
-  const evolucion = Array.from(
-    totalesPorDia,
-    ([fecha, costeTotal]) => ({
-      fecha,
-      costeTotal: costeTotal.toString(),
-    }),
-  );
+  const evolucion = agruparDesperdiciosPorDia(desperdicios);
 
   return NextResponse.json(evolucion);
 }
