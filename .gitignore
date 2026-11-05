@@ -47,3 +47,5 @@ next-env.d.ts
 # Archivos CSV utilizados para pruebas
 compras-prueba.csv
 ventas-prueba.csv
+compras-lote-prueba.csv
+ventas-lote-prueba.csv

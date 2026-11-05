@@ -112,14 +112,37 @@ export async function POST(request: NextRequest) {
   });
 
 
-  const comprasGuardadas = await prisma.compra.createMany({
-    data: comprasPreparadas,
+
+  const resultadoImportacion = await prisma.$transaction(async (tx) => {
+    const importacion = await tx.importacion.create({
+      data: {
+        tipo: "compras",
+        archivo: archivo.name,
+        filasOk: comprasPreparadas.length,
+        filasError: 0,
+        estado: "completada",
+      },
+    });
+
+    const comprasGuardadas = await tx.compra.createMany({
+      data: comprasPreparadas.map((compra) => ({
+        ...compra,
+        importacionId: importacion.id,
+      })),
+    });
+
+    return {
+      importacionId: importacion.id,
+      cantidadImportada: comprasGuardadas.count,
+    };
   });
+
 
   return NextResponse.json(
     {
       mensaje: "Compras importadas correctamente",
-      cantidadImportada: comprasGuardadas.count,
+      importacionId: resultadoImportacion.importacionId,
+      cantidadImportada: resultadoImportacion.cantidadImportada,
     },
     { status: 201 }
   );
