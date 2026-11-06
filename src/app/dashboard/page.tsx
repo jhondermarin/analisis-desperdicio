@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import {
   BarChart,
@@ -256,6 +257,12 @@ export default function DashboardPage() {
         color: "#1f2937",
     }}
     >
+    <Link
+      href="/"
+      className="text-green-700 hover:underline"
+    >
+      ← Volver al inicio
+    </Link>
         
     <h1
     style={{
