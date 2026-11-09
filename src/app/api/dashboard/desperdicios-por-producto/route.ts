@@ -71,18 +71,20 @@ export async function GET(request: NextRequest) {
     select: {
         id: true,
         nombre: true,
+        unidad: true,
     },
     });
 
-    const nombresProductos = new Map(
-    productos.map((producto) => [producto.id, producto.nombre]),
+    const datosProductos = new Map(
+    productos.map((producto) => [producto.id, producto]),
     );
 
 
   return NextResponse.json(
     grupos.map((grupo) => ({
       productoId: grupo.productoId,
-      producto: nombresProductos.get(grupo.productoId) ?? null,
+      producto: datosProductos.get(grupo.productoId)?.nombre ?? null,
+      unidad: datosProductos.get(grupo.productoId)?.unidad ?? null,
       cantidadRegistros: grupo._count.id,
       cantidadDesperdiciada:
         grupo._sum.cantidad?.toString() ?? "0",

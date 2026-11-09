@@ -11,7 +11,7 @@ export async function GET() {
     },
     orderBy: {
       _sum: {
-        cantidad: "desc",
+        total: "desc",
       },
     },
   });
@@ -25,6 +25,7 @@ export async function GET() {
     select: {
       id: true,
       nombre: true,
+      unidad: true,
     },
   });
 
@@ -36,6 +37,7 @@ export async function GET() {
     return {
       productoId: compra.productoId,
       producto: producto?.nombre ?? "Sin nombre",
+      unidad: producto?.unidad ?? "Sin unidad",
       cantidadComprada:
         compra._sum.cantidad?.toString() ?? "0",
       totalComprado:

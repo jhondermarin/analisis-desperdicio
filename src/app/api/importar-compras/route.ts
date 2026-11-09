@@ -22,6 +22,37 @@ export async function POST(request: NextRequest) {
 
     const lineas = contenido.trim().split(/\r?\n/);
 
+        // Comprobar que el CSV contiene registros
+    if (lineas.length < 2) {
+      return NextResponse.json(
+        {
+          error: "El archivo CSV debe contener encabezados y al menos una compra.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validar los encabezados del archivo
+    const encabezados = lineas[0]
+      .split(",")
+      .map((columna) => columna.trim().replace(/^\uFEFF/, ""));
+
+    const encabezadosEsperados = ["fecha", "productoId", "cantidad"];
+
+    if (
+      encabezados.length !== encabezadosEsperados.length ||
+      !encabezadosEsperados.every(
+        (encabezado, indice) => encabezados[indice] === encabezado
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error: "El CSV debe contener las columnas: fecha,productoId,cantidad, en ese orden.",
+        },
+        { status: 400 }
+      );
+    }
+
     const compras = lineas.slice(1).map((linea) => {
     const [fecha, productoId, cantidad] = linea.split(",");
 

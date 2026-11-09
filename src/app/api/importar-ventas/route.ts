@@ -19,6 +19,35 @@ export async function POST(request: NextRequest) {
   const contenido = await archivo.text();
   const lineas = contenido.trim().split(/\r?\n/);
 
+  if (lineas.length < 2) {
+  return NextResponse.json(
+    {
+      error: "El archivo CSV debe contener encabezados y al menos una venta.",
+    },
+    { status: 400 }
+  );
+}
+
+    const encabezados = lineas[0]
+      .split(",")
+      .map((columna) => columna.trim().replace(/^\uFEFF/, ""));
+
+    const encabezadosEsperados = ["fecha", "productoId", "cantidad"];
+
+    if (
+      encabezados.length !== encabezadosEsperados.length ||
+      !encabezadosEsperados.every(
+        (encabezado, indice) => encabezados[indice] === encabezado
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error: "El CSV debe contener las columnas: fecha,productoId,cantidad, en ese orden.",
+        },
+        { status: 400 }
+      );
+  }
+
   // 1. Convertir las filas del CSV en ventas
   const ventas = lineas.slice(1).map((linea) => {
     const [fecha, productoId, cantidad] = linea.split(",");

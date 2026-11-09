@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       ? { gte: new Date(`${fechaDesde}T00:00:00.000Z`) }
       : {}),
     ...(fechaHasta !== null
-      ? { lte: new Date(`${fechaHasta}T00:00:00.000Z`) }
+      ? { lte: new Date(`${fechaHasta}T23:59:59.999Z`) }
       : {}),
   };
 

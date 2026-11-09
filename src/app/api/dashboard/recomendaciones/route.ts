@@ -82,7 +82,11 @@ export async function GET() {
       recomendacion:
         porcentajeDesperdicio > 20
           ? "Revisar las cantidades compradas: el desperdicio supera el 20 %."
-          : "No se detecta un desperdicio elevado según el umbral establecido.",
+          : cantidadComprada > 0 &&
+              (cantidadComprada - cantidadVendida - cantidadDesperdiciada) /
+                cantidadComprada > 0.3
+            ? "Posible exceso de compras: revisar las existencias y ajustar las próximas compras según la demanda."
+            : "No se detectan indicadores elevados de desperdicio o exceso de compras.",
     };
   });
 
