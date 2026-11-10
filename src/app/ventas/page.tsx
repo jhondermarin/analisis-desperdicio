@@ -19,6 +19,10 @@ export default function VentasPage() {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
+  const [archivoCSV, setArchivoCSV] = useState<File | null>(null);
+  const [importando, setImportando] = useState(false);
+  const [mensajeImportacion, setMensajeImportacion] = useState("");
+  const [errorImportacion, setErrorImportacion] = useState("");
 
   useEffect(() => {
 
@@ -89,6 +93,60 @@ export default function VentasPage() {
       setGuardando(false);
     }
   }
+
+  async function importarVentas(evento: React.FormEvent<HTMLFormElement>) {
+  evento.preventDefault();
+
+  if (!archivoCSV) {
+    setErrorImportacion("Debes seleccionar un archivo CSV.");
+    return;
+  }
+
+  setImportando(true);
+  setMensajeImportacion("");
+  setErrorImportacion("");
+
+  try {
+    const formulario = new FormData();
+    formulario.append("archivo", archivoCSV);
+
+    const respuesta = await fetch("/api/importar-ventas", {
+      method: "POST",
+      body: formulario,
+    });
+
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      const detalle = Array.isArray(resultado.resultados)
+        ? resultado.resultados
+            .filter((fila: { valida: boolean }) => !fila.valida)
+            .map(
+              (fila: { fila: number; errores: string[] }) =>
+                `Fila ${fila.fila}: ${fila.errores.join(", ")}`
+            )
+            .join("; ")
+        : "";
+
+      throw new Error(
+        [resultado.mensaje || resultado.error || "No se pudo importar el archivo", detalle]
+          .filter(Boolean)
+          .join(" ")
+      );
+    }
+
+    setMensajeImportacion(
+      `Importación completada: ${resultado.cantidadImportada} ventas registradas.`
+    );
+    setArchivoCSV(null);
+  } catch (err) {
+    setErrorImportacion(
+      err instanceof Error ? err.message : "Error inesperado al importar"
+    );
+  } finally {
+    setImportando(false);
+  }
+}
 
   return (
     <main className="min-h-screen bg-green-50 px-6 py-10">
@@ -173,6 +231,53 @@ export default function VentasPage() {
             {guardando ? "Guardando..." : "Registrar venta"}
           </button>
         </form>
+
+        <section className="mt-8 rounded-xl bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-green-800">
+          Importar ventas desde CSV
+        </h2>
+
+        <p className="mt-2 text-sm text-gray-700">
+          Selecciona un archivo CSV con las columnas:
+          fecha,productoId,cantidad
+        </p>
+
+        <form onSubmit={importarVentas} className="mt-5 space-y-4">
+          <label className="flex flex-col gap-2 text-gray-700">
+            Archivo CSV
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(e) => {
+                setArchivoCSV(e.target.files?.[0] ?? null);
+                setMensajeImportacion("");
+                setErrorImportacion("");
+              }}
+              className="rounded border p-3"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={importando || !archivoCSV}
+            className="rounded-lg bg-green-700 px-6 py-3 font-medium text-white hover:bg-green-800 disabled:opacity-50"
+          >
+            {importando ? "Importando..." : "Importar ventas"}
+          </button>
+        </form>
+
+        {mensajeImportacion && (
+          <p role="status" className="mt-4 rounded bg-green-100 p-4 text-green-800">
+            {mensajeImportacion}
+          </p>
+        )}
+
+        {errorImportacion && (
+          <p role="alert" className="mt-4 rounded bg-red-50 p-4 text-red-700">
+            {errorImportacion}
+          </p>
+        )}
+      </section>
 
         {mensaje && (
           <p role="status" className="mt-4 rounded bg-green-100 p-4 text-green-800">
