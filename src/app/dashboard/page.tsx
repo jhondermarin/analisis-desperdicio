@@ -384,14 +384,23 @@ export default function DashboardPage() {
         <BarChart
           data={productosDesperdiciados.map((producto) => ({
             nombre: producto.producto ?? "Sin nombre",
-            cantidad: Number(producto.cantidadDesperdiciada),
+            coste: Number(producto.costeTotal),
           }))}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="nombre" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="cantidad" fill="#dc2626" />
+          <YAxis tickFormatter={(valor) => `${valor} €`} />
+          <Tooltip
+            formatter={(valor) => [
+              `${Number(valor).toFixed(2)} €`,
+              "Coste de pérdida",
+            ]}
+          />
+          <Bar
+            dataKey="coste"
+            name="Coste de pérdida"
+            fill="#dc2626"
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -412,14 +421,23 @@ export default function DashboardPage() {
         <BarChart
           data={productosComprados.map((producto) => ({
             nombre: producto.producto,
-            cantidad: Number(producto.cantidadComprada),
+            total: Number(producto.totalComprado),
           }))}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="nombre" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="cantidad" fill="#2563eb" />
+          <YAxis tickFormatter={(valor) => `${valor} €`} />
+          <Tooltip
+            formatter={(valor) => [
+              `${Number(valor).toFixed(2)} €`,
+              "Total comprado",
+            ]}
+          />
+          <Bar
+            dataKey="total"
+            name="Total comprado"
+            fill="#2563eb"
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -434,6 +452,10 @@ export default function DashboardPage() {
     >
       Comparativa de compras, ventas y desperdicios
     </h3>
+    <p style={{ marginBottom: "16px", color: "#4b5563" }}>
+    Comparación de cantidades compradas, vendidas y desperdiciadas
+    según la unidad de medida seleccionada.
+    </p>
     
     
     <label
@@ -566,14 +588,23 @@ export default function DashboardPage() {
         <BarChart
           data={productosVendidos.map((producto) => ({
             nombre: producto.producto,
-            cantidad: Number(producto.cantidadVendida),
+            total: Number(producto.totalVendido),
           }))}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="nombre" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="cantidad" fill="#16a34a" />
+          <YAxis tickFormatter={(valor) => `${valor} €`} />
+          <Tooltip
+            formatter={(valor) => [
+              `${Number(valor).toFixed(2)} €`,
+              "Total vendido",
+            ]}
+          />
+          <Bar
+            dataKey="total"
+            name="Total vendido"
+            fill="#16a34a"
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
