@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# Análisis de Ventas y Desperdicio
 
-First, run the development server:
+Aplicación web para registrar, consultar y analizar las compras, ventas y desperdicios de productos de un establecimiento.
+
+El objetivo del proyecto es facilitar el seguimiento de las operaciones y proporcionar información visual que ayude a identificar pérdidas y oportunidades de mejora.
+
+## Aplicación publicada
+
+La aplicación está desplegada en Vercel y utiliza una base de datos PostgreSQL alojada en Neon.
+
+URL: [(https://analisis-desperdicio.vercel.app)]
+
+## Funcionalidades
+
+- Gestión de productos, categorías y proveedores.
+- Registro de compras y ventas.
+- Registro de desperdicios y sus motivos.
+- Importación de compras y ventas mediante archivos CSV.
+- Dashboard con indicadores económicos y gráficos.
+- Análisis de desperdicios por producto y motivo.
+- Visualización de la evolución de los desperdicios.
+- Filtrado de indicadores por fechas.
+- Recomendaciones basadas en los datos registrados.
+- Validación de datos en las rutas API.
+
+## Tecnologías utilizadas
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Prisma ORM 6
+- PostgreSQL
+- Zod
+- Recharts
+
+## Ejecución local
+
+### Requisitos
+
+- Node.js y npm
+- PostgreSQL
+- Una base de datos configurada
+
+### Instalación
+
+```bash
+npm install
+```
+
+Crear un archivo `.env` con la variable `DATABASE_URL` correspondiente a la base de datos local.
+
+Aplicar las migraciones:
+
+```bash
+npx prisma migrate deploy
+```
+
+Generar el cliente Prisma:
+
+```bash
+npx prisma generate
+```
+
+Iniciar el servidor de desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir http://localhost:3000 en el navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Datos de demostración
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El repositorio incluye scripts para preparar datos de ejemplo:
 
-## Learn More
+- `prisma/seed.ts`: categorías y motivos de desperdicio.
+- `prisma/seed-demo.ts`: productos de demostración.
+- `prisma/seed-operaciones-demo.ts`: compras, ventas y desperdicios ficticios.
 
-To learn more about Next.js, take a look at the following resources:
+Estos scripts no se ejecutan automáticamente durante la compilación.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+La aplicación publicada contiene datos ficticios para facilitar su evaluación.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Despliegue
 
-## Deploy on Vercel
+- Código fuente: GitHub.
+- Aplicación web: Vercel.
+- Base de datos: Neon PostgreSQL.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La variable `DATABASE_URL` se configura mediante las variables de entorno del servicio de despliegue y no se almacena en el repositorio.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Nota
+
+Proyecto desarrollado como parte de un período de prácticas formativas.
